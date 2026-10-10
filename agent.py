@@ -1,15 +1,16 @@
-import uuid
-
-from openai import OpenAI
-from datetime import datetime
-import time
-from dotenv import load_dotenv
-import os
 import json
+import os
+import time
+import uuid
+from datetime import datetime
+
+from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
+
 
 # --------------------------------------------------
 # TRACING MECHANICS
@@ -17,15 +18,12 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 def new_trace_id():
     return str(uuid.uuid4())[:8]
 
+
 def trace(trace_id, event, **data):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-    details = " ".join (f"{key}={value}" for key, value in data.items())
-    print(
-            f"[{timestamp}]"
-            f" [TRACE] [{trace_id}]"
-            f" {event}"
-            f" {details}"
-        )
+    details = " ".join(f"{key}={value}" for key, value in data.items())
+    print(f"[{timestamp}] [TRACE] [{trace_id}] {event} {details}")
+
 
 def new_trace_context():
     return {
@@ -33,8 +31,10 @@ def new_trace_context():
         "llm_calls": 0,
         "tool_calls": 0,
         "input_tokens": 0,
-        "output_tokens": 0
+        "output_tokens": 0,
     }
+
+
 # --------------------------------------------------
 # LLM MODEL CALL
 # --------------------------------------------------
@@ -57,50 +57,55 @@ def call_llm_model(trace_id, user_input, tools, context, previous_response_id=No
         instructions=instructions,
         input=user_input,
         tools=tools,
-        previous_response_id=previous_response_id
+        previous_response_id=previous_response_id,
     )
 
     duration = (time.perf_counter() - start) * 1000
 
-    trace(trace_id, "LLM.completed", response_id=response.id, duration_ms=round(duration, 2))
+    trace(
+        trace_id,
+        "LLM.completed",
+        response_id=response.id,
+        duration_ms=round(duration, 2),
+    )
 
     if response.usage:
-        context["input_tokens"] += (
-            response.usage.input_tokens
-        )
-        context["output_tokens"] += (
-            response.usage.output_tokens
-        )
+        context["input_tokens"] += response.usage.input_tokens
+        context["output_tokens"] += response.usage.output_tokens
 
         trace(
             trace_id,
             "LLM.usage",
             input_tokens=response.usage.input_tokens,
             output_tokens=response.usage.output_tokens,
-            total_tokens=response.usage.total_tokens
+            total_tokens=response.usage.total_tokens,
         )
-        
+
     return response
 
 
-  
 # --------------------------------------------------
 # MEMORY & MEMORY TOOLS IMPLEMENTATIONS
 # --------------------------------------------------
 AGENT_MEMORY = "memory.json"
+
+
 def load_memory():
     if os.path.exists(AGENT_MEMORY):
         with open(AGENT_MEMORY, "r") as file:
             return json.load(file)
     return {}
 
+
 def save_memory(memory):
     with open(AGENT_MEMORY, "w") as file:
         json.dump(memory, file, indent=2)
 
+
 def recall(key):
     memory = load_memory()
     return memory.get(key, f"No memory found for this key: {key}")
+
 
 def remember(key, value):
     memory = load_memory()
@@ -108,9 +113,11 @@ def remember(key, value):
     save_memory(memory)
     return f"Memory saved for key: {key}"
 
+
 # --------------------------------------------------
 # TOOL IMPLEMENTATIONS
 # --------------------------------------------------
+
 
 def calculator(a, b, operation):
     if operation == "add":
@@ -128,28 +135,25 @@ def calculator(a, b, operation):
 def get_current_time():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+
 def send_payment(amount, recipient):
     # Simulated payment
     return f"SIMULATED payment of {amount} to {recipient} completed."
 
+
 def get_product_price(product):
     # Simulated product price retrieval
-    prices = {
-        "laptop": 1200,
-        "phone": 800,
-        "headphones": 150
-    }
+    prices = {"laptop": 1200, "phone": 800, "headphones": 150}
     return prices.get(product.lower(), f"Price for {product} not found.")
+
 
 def get_shipping_cost(destination):
     # Simulated shipping cost retrieval
     return 2000
 
+
 def record_plan(steps):
-    return {
-        "status": "Plan recorded successfully.",
-        "steps": steps
-    }
+    return {"status": "Plan recorded successfully.", "steps": steps}
 
 
 # --------------------------------------------------
@@ -164,8 +168,9 @@ tool_registry = {
     "remember": remember,
     "get_product_price": get_product_price,
     "get_shipping_cost": get_shipping_cost,
-    "record_plan": record_plan
+    "record_plan": record_plan,
 }
+
 
 # --------------------------------------------------
 # TOOL EXECUTION CALL
@@ -182,11 +187,23 @@ def execute_tool_call(trace_id, tool_name, arguments):
     try:
         result = function(**arguments)
         duration = (time.perf_counter() - start) * 1000
-        trace(trace_id, "Tool.Execution.Completed", tool_name=tool_name, duration_ms=round(duration, 2), result=result)
+        trace(
+            trace_id,
+            "Tool.Execution.Completed",
+            tool_name=tool_name,
+            duration_ms=round(duration, 2),
+            result=result,
+        )
         return result
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         duration = (time.perf_counter() - start) * 1000
-        trace(trace_id, "Tool.Execution.Error", tool_name=tool_name, duration_ms=round(duration, 2), error=str(error))
+        trace(
+            trace_id,
+            "Tool.Execution.Error",
+            tool_name=tool_name,
+            duration_ms=round(duration, 2),
+            error=str(error),
+        )
         return f"Error executing tool {tool_name}: {error}"
 
 
@@ -204,11 +221,14 @@ tools = [
             "properties": {
                 "a": {"type": "number"},
                 "b": {"type": "number"},
-                "operation": {"type": "string", "enum": ["add", "subtract", "multiply", "divide"]}
+                "operation": {
+                    "type": "string",
+                    "enum": ["add", "subtract", "multiply", "divide"],
+                },
             },
             "required": ["a", "b", "operation"],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     {
         "type": "function",
@@ -218,8 +238,8 @@ tools = [
             "type": "object",
             "properties": {},
             "required": [],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     {
         "type": "function",
@@ -227,12 +247,10 @@ tools = [
         "description": "Retrieve a previously stored user fact when it is relevant to the user's request.",
         "parameters": {
             "type": "object",
-            "properties": {
-                "key": {"type": "string"}
-            },
+            "properties": {"key": {"type": "string"}},
             "required": ["key"],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     {
         "type": "function",
@@ -243,13 +261,10 @@ tools = [
         ),
         "parameters": {
             "type": "object",
-            "properties": {
-                "key": {"type": "string"},
-                "value": {"type": "string"}
-            },
+            "properties": {"key": {"type": "string"}, "value": {"type": "string"}},
             "required": ["key", "value"],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     {
         "type": "function",
@@ -262,11 +277,11 @@ tools = [
             "type": "object",
             "properties": {
                 "amount": {"type": "number"},
-                "recipient": {"type": "string"}
+                "recipient": {"type": "string"},
             },
             "required": ["amount", "recipient"],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     {
         "type": "function",
@@ -274,12 +289,10 @@ tools = [
         "description": "Get the price of a product.",
         "parameters": {
             "type": "object",
-            "properties": {
-                "product": {"type": "string"}
-            },
+            "properties": {"product": {"type": "string"}},
             "required": ["product"],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     {
         "type": "function",
@@ -287,12 +300,10 @@ tools = [
         "description": "Get the shipping cost for a destination.",
         "parameters": {
             "type": "object",
-            "properties": {
-                "destination": {"type": "string"}
-            },
+            "properties": {"destination": {"type": "string"}},
             "required": ["destination"],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     {
         "type": "function",
@@ -303,25 +314,24 @@ tools = [
         ),
         "parameters": {
             "type": "object",
-            "properties": {
-                "steps": {"type": "array"}
-            },
+            "properties": {"steps": {"type": "array"}},
             "required": ["steps"],
-            "additionalProperties": False
-        }
-    }
+            "additionalProperties": False,
+        },
+    },
 ]
 
 # --------------------------------------------------
 # VALIDATIONS, POLCIIES AND APPROVALS
 # --------------------------------------------------
 
+
 def validate_tool_call(tool_name, arguments):
-    if tool_name == "calculator":
+    if tool_name == "calculator":  # noqa: SIM114
         return True, None
-    elif tool_name == "get_current_time":
+    elif tool_name == "get_current_time":  # noqa: SIM114
         return True, None
-    elif tool_name == "recall":
+    elif tool_name == "recall":  # noqa: SIM114
         return True, None
     elif tool_name == "remember":
         return True, None
@@ -351,10 +361,8 @@ def validate_tool_call(tool_name, arguments):
 
 
 def requires_approval(tool_name, arguments):
-    if tool_name == "send_payment":
-        return True
+    return tool_name == "send_payment"
 
-    return False
 
 def request_human_approval(tool_name, arguments):
     print("\n*** HUMAN APPROVAL REQUIRED ***")
@@ -369,31 +377,38 @@ def request_human_approval(tool_name, arguments):
 # AGENT FUNCTION
 # --------------------------------------------------
 
+
 def run_agent(trace_id, user_input, previous_response_id=None):
     agent_start = time.perf_counter()
-    trace(trace_id, "Agent.Started", user_input=user_input, previous_response_id=previous_response_id)
+    trace(
+        trace_id,
+        "Agent.Started",
+        user_input=user_input,
+        previous_response_id=previous_response_id,
+    )
 
-    response = call_llm_model(trace_id, user_input, tools, context, previous_response_id)
+    response = call_llm_model(
+        trace_id, user_input, tools, context, previous_response_id
+    )
     context["llm_calls"] += 1
     print("\n" + response.to_json())
 
     while True:
-
-        tool_calls = [
-            item
-            for item in response.output
-            if item.type == "function_call"
-        ]
+        tool_calls = [item for item in response.output if item.type == "function_call"]
 
         if not tool_calls:
             duration = (time.perf_counter() - agent_start) * 1000
-            trace(trace_id, "Agent.Completed", response_id=response.id, duration_ms=round(duration, 2))
+            trace(
+                trace_id,
+                "Agent.Completed",
+                response_id=response.id,
+                duration_ms=round(duration, 2),
+            )
             return response
 
         tool_outputs = []
 
         for tool_call in tool_calls:
-
             print("\n[Tool requested]", tool_call.name)
             print("[Arguments]", tool_call.arguments)
 
@@ -406,40 +421,57 @@ def run_agent(trace_id, user_input, previous_response_id=None):
                     {
                         "type": "function_call_output",
                         "call_id": tool_call.call_id,
-                        "output": result
+                        "output": result,
                     }
                 )
                 continue
             # --------------------------------------
             # A. VALIDATION
             # --------------------------------------
-            trace(trace_id, "Tool.Validation.Started", tool_name=tool_call.name, arguments=arguments)
+            trace(
+                trace_id,
+                "Tool.Validation.Started",
+                tool_name=tool_call.name,
+                arguments=arguments,
+            )
             valid, validation_message = validate_tool_call(tool_call.name, arguments)
             if not valid:
-                result = (
-                    f"Tool execution rejected: "
-                    f"{validation_message}"
-                )
+                result = f"Tool execution rejected: {validation_message}"
 
                 print("[Validation rejected]", result)
                 tool_outputs.append(
                     {
                         "type": "function_call_output",
                         "call_id": tool_call.call_id,
-                        "output": result
+                        "output": result,
                     }
                 )
                 continue
             else:
-                trace(trace_id, "Tool.Validation.Passed", tool_name=tool_call.name, arguments=arguments)
+                trace(
+                    trace_id,
+                    "Tool.Validation.Passed",
+                    tool_name=tool_call.name,
+                    arguments=arguments,
+                )
 
             # --------------------------------------
             # B. APPROVAL POLICY
             # --------------------------------------
             if requires_approval(tool_call.name, arguments):
-                trace(trace_id, "Tool.Approval.Requested", tool_name=tool_call.name, arguments=arguments)
+                trace(
+                    trace_id,
+                    "Tool.Approval.Requested",
+                    tool_name=tool_call.name,
+                    arguments=arguments,
+                )
                 approved = request_human_approval(tool_call.name, arguments)
-                trace(trace_id, "Tool.Approval.Completed", tool_name=tool_call.name, approved=approved)
+                trace(
+                    trace_id,
+                    "Tool.Approval.Completed",
+                    tool_name=tool_call.name,
+                    approved=approved,
+                )
                 if not approved:
                     result = (
                         f"Tool execution rejected: "
@@ -450,7 +482,7 @@ def run_agent(trace_id, user_input, previous_response_id=None):
                         {
                             "type": "function_call_output",
                             "call_id": tool_call.call_id,
-                            "output": result
+                            "output": result,
                         }
                     )
                     continue
@@ -458,7 +490,12 @@ def run_agent(trace_id, user_input, previous_response_id=None):
             # --------------------------------------
             # C. EXECUTION
             # --------------------------------------
-            trace(trace_id, "Tool.Execution.Started", tool_name=tool_call.name, arguments=arguments)
+            trace(
+                trace_id,
+                "Tool.Execution.Started",
+                tool_name=tool_call.name,
+                arguments=arguments,
+            )
             result = execute_tool_call(trace_id, tool_call.name, arguments)
             print("[Tool result]", result)
 
@@ -466,7 +503,7 @@ def run_agent(trace_id, user_input, previous_response_id=None):
                 {
                     "type": "function_call_output",
                     "call_id": tool_call.call_id,
-                    "output": str(result)
+                    "output": str(result),
                 }
             )
 
@@ -482,8 +519,9 @@ def run_agent(trace_id, user_input, previous_response_id=None):
             llm_calls=context["llm_calls"],
             tool_calls=context["tool_calls"],
             input_tokens=context["input_tokens"],
-            output_tokens=context["output_tokens"]
-        )   
+            output_tokens=context["output_tokens"],
+        )
+
 
 # --------------------------------------------------
 # CONVERSATION LOOP
@@ -499,27 +537,16 @@ while True:
     trace_id = context["trace_id"]
     trace(trace_id, "Agent.Step", step=steps)
     if steps > MAX_AGENT_STEPS:
+        trace(trace_id, "agent.max_steps_exceeded", max_steps=MAX_AGENT_STEPS)
 
-        trace(
-            trace_id,
-            "agent.max_steps_exceeded",
-            max_steps=MAX_AGENT_STEPS
-        )
-
-        raise RuntimeError(
-            "Agent exceeded maximum allowed steps."
-        )
+        raise RuntimeError("Agent exceeded maximum allowed steps.")
     user_input = input("\nYou: ")
 
     if user_input.lower() in ["exit", "quit"]:
         print("Goodbye!")
         break
 
-    response = run_agent(
-        trace_id,
-        user_input,
-        previous_response_id
-    )
+    response = run_agent(trace_id, user_input, previous_response_id)
 
     print("\nAgent:")
     print(response.output_text)
