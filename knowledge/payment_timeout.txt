@@ -1,0 +1,16 @@
+Title: Payment Timeout Policy
+
+If a payment provider times out after an
+authorization request, the payment status
+must be marked as PENDING_VERIFICATION.
+
+The system must not immediately retry
+the authorization unless the provider
+supports safe idempotent retries.
+
+A status enquiry should be performed
+using the original transaction reference.
+
+If the provider status remains unknown,
+the transaction must be routed for
+reconciliation.

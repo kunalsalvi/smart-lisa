@@ -1,0 +1,13 @@
+Title: Refund Policy
+
+Refunds may only be initiated for
+successfully captured payments.
+
+Refund requests must include the original
+payment transaction reference.
+
+Duplicate refund requests must be
+prevented using an idempotency key.
+
+Refund failures should be investigated
+before additional requests are issued.

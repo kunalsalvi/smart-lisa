@@ -1,0 +1,16 @@
+Title: Reconciliation Procedure
+
+Transactions with unknown outcomes must
+be reconciled against the provider's
+authoritative transaction records.
+
+Reconciliation compares internal transaction
+records against provider settlement or
+status information.
+
+A payment must not be declared failed
+solely because the initial API call
+timed out.
+
+Unresolved discrepancies must be
+escalated for manual investigation.
