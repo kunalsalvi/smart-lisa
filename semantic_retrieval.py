@@ -4,7 +4,7 @@ from math import sqrt
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from retrieval import load_documents
+from chunking import load_chunks
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -31,19 +31,13 @@ def cosine_similarity(a, b):
 
 
 def build_index():
-    documents = load_documents()
+    chunks = load_chunks()
     index = []
 
-    for document in documents:
-        vector = embed_text(document["content"])
+    for chunk in chunks:
+        vector = embed_text(chunk["content"])
 
-        index.append(
-            {
-                "source": document["source"],
-                "content": document["content"],
-                "embedding": vector,
-            }
-        )
+        index.append({**chunk, "embedding": vector})
 
     return index
 
@@ -58,7 +52,8 @@ def semantic_search(query, index, top_k=2):
         results.append(
             {
                 "source": document["source"],
-                "content": document["content"],
+                "chunk_id": document["chunk_id"],
+                # "content": document["content"],
                 "score": score,
             }
         )
@@ -71,7 +66,7 @@ def semantic_search(query, index, top_k=2):
 if __name__ == "__main__":
     index = build_index()
 
-    query = "How should we handle authorization when the gateway stops responding?"
+    query = "What if the payment gateway becomes unresponsive?"
 
-    for result in semantic_search(query, index):
-        print(result["source"], round(result["score"], 4))
+    for result in semantic_search(query, index, top_k=3):
+        print(result["chunk_id"], result["source"], round(result["score"], 4))
