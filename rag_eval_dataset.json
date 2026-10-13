@@ -1,0 +1,51 @@
+
+[
+  {
+    "id": "Q1",
+    "query": "What happens when a payment provider times out?",
+    "relevant_chunks": [
+      "payment_timeout:0",
+      "payment_timeout:1"
+    ],
+    "answerable": true
+  },
+  {
+    "id": "Q2",
+    "query": "How should we handle authorization when the gateway stops responding?",
+    "relevant_chunks": [
+      "payment_timeout:0",
+      "payment_timeout:1"
+    ],
+    "answerable": true
+  },
+  {
+    "id": "Q3",
+    "query": "How do we prevent duplicate refunds?",
+    "relevant_chunks": [
+      "refund_policy:0"
+    ],
+    "answerable": true
+  },
+  {
+    "id": "Q4",
+    "query": "What if settlement records don't match?",
+    "relevant_chunks": [
+      "reconciliation:0"
+    ],
+    "answerable": true
+  },
+  {
+    "id": "Q5",
+    "query": "What does PENDING_VERIFICATION mean?",
+    "relevant_chunks": [
+      "payment_timeout:0"
+    ],
+    "answerable": true
+  },
+  {
+    "id": "Q6",
+    "query": "What is AtlasPay's employee maternity leave policy?",
+    "relevant_chunks": [],
+    "answerable": false
+  }
+]

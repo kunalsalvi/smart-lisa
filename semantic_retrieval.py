@@ -52,7 +52,7 @@ def semantic_search(query, index, top_k=2):
         results.append(
             {
                 "source": document["source"],
-                "chunk_id": document["chunk_id"],
+                "chunk_id": document["content"],
                 # "content": document["content"],
                 "score": score,
             }
