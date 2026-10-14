@@ -46,13 +46,13 @@ def hybrid_search(query, top_k=3):
         return []
 
     keyword_results = keyword_rank(query, documents)
-    print_search_results("Keyword", 2, index, keyword_results)
+    # print_search_results("Keyword", 2, index, keyword_results)
 
     semantic_results = semantic_rank(query, documents)
-    print_search_results("Semantic", 2, index, semantic_results)
+    # print_search_results("Semantic", 2, index, semantic_results)
 
     fused_results = reciprocal_rank_fusion([keyword_results, semantic_results])
-    print_search_results("Fused", 2, index, fused_results)
+    # print_search_results("Fused", 2, index, fused_results)
 
     results = []
 
@@ -80,12 +80,12 @@ def print_search_results(search_type, top_k, index, search_results):
 
 if __name__ == "__main__":
     # query = "What should happen when a payment gateway stops responding?"
-    # query = "What happens when a payment provider times out?"
+    query = "What happens when a payment provider times out?"
     # query = "How should we handle authorization when the gateway stops responding?"
     # query = "What does PENDING_VERIFICATION mean?"
     # query = "How do we prevent duplicate refunds?"
     # query = "What if settlement records don't match?"
-    query = "What is AtlasPay's employee maternity leave policy?"
+    # query = "What is AtlasPay's employee maternity leave policy?"
     print(f"Query : {query}\n")
     for result in hybrid_search(query):
         print(result["chunk_id"], round(result["score"], 5), "\n")
