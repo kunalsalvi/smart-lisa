@@ -1,11 +1,11 @@
-from persistent_index import load_index
 from semantic_retrieval import cosine_similarity, embed_text
+from trusted_retrieval import approved_documents
 
 RELEVANCE_THRESHOLD = 0.35
 
 
 def retrieve_with_gate(query, top_k=3):
-    documents = list(load_index().values())
+    documents = list(approved_documents().values())
 
     if not documents:
         return {"status": "NO_EVIDENCE", "results": []}

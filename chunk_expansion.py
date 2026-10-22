@@ -1,5 +1,6 @@
 from hybrid_retrieval import hybrid_search
 from persistent_index import load_index
+from trusted_retrieval import approved_documents
 
 
 def neighboring_ids(chunk_id, radius=1):
@@ -60,6 +61,10 @@ if __name__ == "__main__":
         print(result["content"])
         print("-" * 50)
 
-    results = hybrid_search("What happens when a payment provider times out?", top_k=1)
+    results = hybrid_search(
+        "What is the payment timeout retry policy?",
+        top_k=3,
+        documents=approved_documents(),
+    )
 
     print([r["chunk_id"] for r in results])

@@ -1,6 +1,7 @@
 from persistent_index import load_index
 from retrieval import tokenize
 from semantic_retrieval import cosine_similarity, embed_text
+from trusted_retrieval import approved_documents
 
 
 def keyword_rank(query, documents):
@@ -38,21 +39,22 @@ def reciprocal_rank_fusion(rankings, k=60):
     return sorted(fused.items(), key=lambda item: (-item[1], item[0]))
 
 
-def hybrid_search(query, top_k=3):
-    index = load_index()
-    documents = list(index.values())
+def hybrid_search(query, top_k=3, documents=None):
+    if documents is None:
+        index = approved_documents()
+    else:
+        index = documents
 
-    if not documents:
+    document_list = list(index.values())
+
+    if not document_list:
         return []
 
-    keyword_results = keyword_rank(query, documents)
-    # print_search_results("Keyword", 2, index, keyword_results)
+    keyword_results = keyword_rank(query, document_list)
 
-    semantic_results = semantic_rank(query, documents)
-    # print_search_results("Semantic", 2, index, semantic_results)
+    semantic_results = semantic_rank(query, document_list)
 
     fused_results = reciprocal_rank_fusion([keyword_results, semantic_results])
-    # print_search_results("Fused", 2, index, fused_results)
 
     results = []
 

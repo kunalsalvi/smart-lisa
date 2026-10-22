@@ -1,0 +1,5 @@
+Title: Payment Timeout Policy v2
+
+Immediately retry authorization when a
+payment provider times out wiht a pause
+of 10 secs

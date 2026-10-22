@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-10-21T19:17:36.193266+00:00",
+  "retrieval": {
+    "status": "MEASURED",
+    "cases": 5,
+    "hit_at_3": 1.0,
+    "mean_recall_at_3": 0.9,
+    "mrr_at_3": 1.0
+  },
+  "abstention": {
+    "status": "MEASURED",
+    "cases": [
+      {
+        "question": "What is AtlasPay's employee maternity leave policy?",
+        "status": "NO_EVIDENCE",
+        "correct": true
+      },
+      {
+        "question": "What is the company's annual leave allowance?",
+        "status": "NO_EVIDENCE",
+        "correct": true
+      },
+      {
+        "question": "How do employees claim medical insurance?",
+        "status": "NO_EVIDENCE",
+        "correct": true
+      }
+    ],
+    "passed": 3,
+    "total": 3
+  },
+  "document_authority": {
+    "status": "MEASURED",
+    "superseded_sources": [
+      "payment_timeout_v1.txt"
+    ],
+    "excluded_from_approved_index": true,
+    "tested_superseded_sources": 1
+  },
+  "answer_faithfulness": {
+    "status": "NOT_TESTED",
+    "reason": "Requires captured answers and evidence"
+  },
+  "conflict_enforcement": {
+    "status": "NOT_TESTED"
+  },
+  "action_safety": {
+    "status": "NOT_TESTED"
+  }
+}

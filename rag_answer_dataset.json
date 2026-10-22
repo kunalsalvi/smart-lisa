@@ -1,0 +1,38 @@
+
+[
+  {
+    "id": "A1",
+    "question": "What happens when a payment provider times out?",
+    "must_contain": [
+      "PENDING_VERIFICATION",
+      "status enquiry",
+      "reconciliation",
+      "provider status remains unknown"
+    ],
+    "must_cite": ["payment_timeout.txt"]
+  },
+  {
+    "id": "A2",
+    "question": "How do we prevent duplicate refunds?",
+    "must_contain": ["idempotency"],
+    "must_cite": ["refund_policy.txt"]
+  },
+  {
+    "id": "A3",
+    "question": "How many times may we retry authorization after a timeout?",
+    "must_contain": ["not specify"],
+    "must_cite": ["payment_timeout.txt"]
+  },
+  {
+    "id": "A4",
+    "question": "What is AtlasPay's maternity leave policy?",
+    "must_contain_any": [
+      "cannot verify",
+      "couldn't verify",
+      "could not verify",
+      "no relevant document was found"
+    ],
+    "must_contain": [],
+    "must_cite": []
+  }
+]

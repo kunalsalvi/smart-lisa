@@ -1,0 +1,4 @@
+Title: Payment Timeout Policy v1
+
+Immediately retry authorization when a
+payment provider times out.

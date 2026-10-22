@@ -1,0 +1,30 @@
+{
+  "payment_timeout.txt": {
+    "policy_id": "PAYMENT_TIMEOUT",
+    "version": 2,
+    "status": "approved",
+    "authority": "payments-risk",
+    "effective_from": "2026-01-01"
+  },
+  "refund_policy.txt": {
+    "policy_id": "REFUND",
+    "version": 1,
+    "status": "approved",
+    "authority": "payments-operations",
+    "effective_from": "2026-01-01"
+  },
+  "reconciliation.txt": {
+    "policy_id": "RECONCILIATION",
+    "version": 1,
+    "status": "approved",
+    "authority": "finance-operations",
+    "effective_from": "2026-01-01"
+  },
+  "payment_timeout_v1.txt": {
+    "policy_id": "PAYMENT_TIMEOUT",
+    "version": 1,
+    "status": "superseded",
+    "authority": "payments-risk",
+    "effective_from": "2024-01-01"
+  }
+}
